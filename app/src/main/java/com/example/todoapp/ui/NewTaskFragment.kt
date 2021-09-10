@@ -7,23 +7,19 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.todoapp.R
-import com.example.todoapp.application.TaskApplication
 import com.example.todoapp.databinding.FragmentNewTaskBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.viewmodel.TaskViewModel
-import com.example.todoapp.viewmodel.TaskViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
-
+@AndroidEntryPoint
 class NewTaskFragment : Fragment(R.layout.fragment_new_task) {
 
     private var _binding: FragmentNewTaskBinding? = null
-    val binding get() = _binding!!
-    val viewModel: TaskViewModel by viewModels {
-        TaskViewModelFactory((requireActivity().application as TaskApplication).repository)
-    }
+    private val binding get() = _binding!!
+    private val viewModel: TaskViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

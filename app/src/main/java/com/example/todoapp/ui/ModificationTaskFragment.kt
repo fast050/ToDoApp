@@ -12,7 +12,6 @@ import com.example.todoapp.application.TaskApplication
 import com.example.todoapp.databinding.FragmentModificationTaskBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.viewmodel.TaskViewModel
-import com.example.todoapp.viewmodel.TaskViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -20,15 +19,13 @@ import java.time.format.FormatStyle
 import java.util.*
 
 
-
+@AndroidEntryPoint
 class ModificationTaskFragment : Fragment(R.layout.fragment_modification_task) {
 
     private var _binding: FragmentModificationTaskBinding? = null
     private val binding get() = _binding!!
     private val args: ModificationTaskFragmentArgs by navArgs()
-    private val viewModel:TaskViewModel by viewModels{
-        TaskViewModelFactory((requireActivity().application as TaskApplication).repository)
-    }
+    private val viewModel:TaskViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

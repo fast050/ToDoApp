@@ -13,7 +13,7 @@ import com.example.todoapp.viewmodel.TaskViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     lateinit var binding:ActivityMainBinding

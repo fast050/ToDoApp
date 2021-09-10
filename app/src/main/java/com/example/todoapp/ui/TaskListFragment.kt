@@ -20,11 +20,10 @@ import com.example.todoapp.application.TaskApplication
 import com.example.todoapp.databinding.FragmentTaskListBinding
 import com.example.todoapp.model.Task
 import com.example.todoapp.viewmodel.TaskViewModel
-import com.example.todoapp.viewmodel.TaskViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class TaskListFragment : Fragment(R.layout.fragment_task_list) {
 
     lateinit var adapter: TasksAdapter
@@ -32,10 +31,7 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
     private val binding get() = _binding!!
     private var IsHide=false
 
-    private val application by lazy { TaskApplication() }
-    private val viewModel: TaskViewModel by viewModels {
-        TaskViewModelFactory((requireActivity().application as TaskApplication).repository)
-    }
+    private val viewModel: TaskViewModel by viewModels()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

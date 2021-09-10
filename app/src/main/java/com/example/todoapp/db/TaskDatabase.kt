@@ -7,32 +7,8 @@ import androidx.room.RoomDatabase
 import com.example.todoapp.model.Task
 
 
-
-
 @Database(entities = [Task::class], version = 1)
 abstract class TaskDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
 
-    companion object {
-        @Volatile
-        private var INSTANCE: TaskDatabase? = null
-        private const val DBNAME = "task_database"
-
-
-        fun getDatabase(context: Context):TaskDatabase
-        {
-            return INSTANCE ?: synchronized(this)
-            {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    TaskDatabase::class.java,
-                    DBNAME
-                ).build()
-
-                INSTANCE = instance
-                instance
-            }
-
-        }
-    }
 }

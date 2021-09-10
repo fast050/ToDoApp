@@ -3,9 +3,11 @@ package com.example.todoapp.repository
 import com.example.todoapp.db.TaskDao
 import com.example.todoapp.model.Task
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-
-class TasksRepository(private val taskDao: TaskDao) {
+@Singleton
+class TasksRepository @Inject constructor(private val taskDao: TaskDao) {
 
     val getAllTasks: Flow<List<Task>> = taskDao.getAllTasks()
 
