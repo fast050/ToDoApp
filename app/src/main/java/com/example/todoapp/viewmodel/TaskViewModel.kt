@@ -12,7 +12,8 @@ import javax.inject.Inject
 class TaskViewModel @Inject constructor(private val repository: TasksRepository):ViewModel()
 {
 
-    val getAllTasks : LiveData<List<Task>> = repository.getAllTasks.asLiveData()
+
+    val getAllTasks: LiveData<List<Task>> = repository.getAllTasks.asLiveData()
 
     fun insertTask(tasks: Task) =viewModelScope.launch{
        repository.insertTasks(tasks)
@@ -34,4 +35,5 @@ class TaskViewModel @Inject constructor(private val repository: TasksRepository)
 
     fun getSortByTask(importance: String,number:Int) = repository.getSortByTask(importance,number).asLiveData()
 
+    fun searchTask(searchQuery:String) = repository.searchTask(searchQuery).asLiveData()
 }

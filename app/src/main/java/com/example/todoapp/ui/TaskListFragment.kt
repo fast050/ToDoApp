@@ -61,19 +61,30 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
 
+                //query?.let { }
+
                 return false
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
 
-                if (newText != null && newText.isNotEmpty()) {
-
-                }
+                newText?.let { searchDatabase(it) }
 
                 return true
             }
 
         })
+    }
+
+
+    private fun searchDatabase(query: String) {
+        val searchQuery = "%$query%"
+
+        viewModel.searchTask(searchQuery).observe(viewLifecycleOwner) { list ->
+            list.let {
+                adapter.submitList(it)
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

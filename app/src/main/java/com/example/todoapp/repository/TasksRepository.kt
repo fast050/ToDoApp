@@ -31,5 +31,6 @@ class TasksRepository @Inject constructor(private val taskDao: TaskDao) {
 
     fun getSortByTask(orderBy : String,numberOfTask :Int):Flow<List<Task>>  =taskDao.getAllTop(orderBy,numberOfTask)
 
+    fun searchTask(searchQuery:String) = taskDao.searchTask(searchQuery)
 
 }
