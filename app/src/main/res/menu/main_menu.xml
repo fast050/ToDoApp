@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item android:title="Delete Completed Item"
+          android:id="@+id/deleteComplete_menuItem"/>
+
+    <item android:title="hide complete"
+        android:id="@+id/hideComplete_menuItem"/>
+
+    <item android:title="search"
+          android:icon="@drawable/ic_baseline_search_24"
+          android:id="@+id/search_bar_menuItem"
+          app:showAsAction="always"
+         app:actionViewClass="androidx.appcompat.widget.SearchView" />
+
+    <item android:title="sort"
+         android:id="@+id/sortBy_menuItem"
+         android:icon="@drawable/ic_baseline_sort_24"
+         app:showAsAction="ifRoom">
+     <menu>
+         <group>
+
+             <item android:title="Sort By important"
+                   android:id="@+id/sortByImportant_menuItem"/>
+             <item android:title="Sort By Create Date"
+                    android:id="@+id/sortByDate_menuItem"/>
+         </group>
+    </menu>
+
+    </item>
+
+
+
+</menu>
