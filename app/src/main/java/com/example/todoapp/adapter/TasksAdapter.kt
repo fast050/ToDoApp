@@ -2,6 +2,7 @@ package com.example.todoapp.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.CheckBox
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -17,6 +18,7 @@ class TasksAdapter(private val listener: OnClickModify) :
     {
         fun onClick(position: Int)
         fun onLongClick(position: Int)
+        fun onClickCheck(position: Int,boolean: Boolean)
     }
 
 
@@ -33,7 +35,15 @@ class TasksAdapter(private val listener: OnClickModify) :
     inner class TaskViewHolder(private val binding: TaskItemBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
 
+
+            binding.completeTask.setOnClickListener {
+                if (adapterPosition!=RecyclerView.NO_POSITION) {
+                    listener.onClickCheck(adapterPosition,binding.completeTask.isChecked)
+                }
+            }
+
             binding.root.apply {
+
 
 
                 setOnClickListener{
@@ -49,6 +59,7 @@ class TasksAdapter(private val listener: OnClickModify) :
                     }
                     true
                 }
+
             }
 
         }
@@ -57,6 +68,7 @@ class TasksAdapter(private val listener: OnClickModify) :
             binding.apply {
              completeTask.isChecked = task.completion
              noteTask.text=task.note
+             noteTask.paint.isStrikeThruText = task.completion
              importanceTask.isVisible=task.importance
             }
         }
@@ -70,3 +82,4 @@ class TasksAdapter(private val listener: OnClickModify) :
 
     }
 }
+

@@ -1,37 +1,40 @@
 package com.example.todoapp.di
 
-import android.content.Context
+import android.app.Application
 import androidx.room.Room
-import androidx.room.RoomDatabase
+import com.example.todoapp.db.DATABASE_NAME
 import com.example.todoapp.db.TaskDao
 import com.example.todoapp.db.TaskDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
-private const val DBNAME = "task_database"
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+object AppModule {
 
     @Provides
     @Singleton
-    fun providesDatabase(@ApplicationContext context: Context): TaskDatabase {
-        return Room.databaseBuilder(context.applicationContext
-                                    , TaskDatabase::class.java
-                                    , DBNAME).build()
+    fun provideTaskDatabase(applicationContext: Application,
+                            callback:TaskDatabase.TaskDatabaseCall  )
+    : TaskDatabase = Room.databaseBuilder(
+        applicationContext, TaskDatabase::class.java,
+        DATABASE_NAME
+    ).fallbackToDestructiveMigration().addCallback(callback).build()
 
-    }
+    @Provides
+    fun provideTaskDao(db: TaskDatabase): TaskDao = db.taskDao()
 
-   @Provides
-   @Singleton
-   fun providesDao(db:TaskDatabase):TaskDao
-   {
-       return db.taskDao()
-   }
-
+    @Provides
+    @ApplicationScope
+    fun provideCoroutineScope():CoroutineScope= CoroutineScope(SupervisorJob())
 }
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class ApplicationScope

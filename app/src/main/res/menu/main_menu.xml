@@ -7,6 +7,7 @@
           android:id="@+id/deleteComplete_menuItem"/>
 
     <item android:title="hide complete"
+        android:checkable="true"
         android:id="@+id/hideComplete_menuItem"/>
 
     <item android:title="search"
@@ -22,8 +23,8 @@
      <menu>
          <group>
 
-             <item android:title="Sort By important"
-                   android:id="@+id/sortByImportant_menuItem"/>
+             <item android:title="Sort By Note"
+                   android:id="@+id/sortByNote_menuItem"/>
              <item android:title="Sort By Create Date"
                     android:id="@+id/sortByDate_menuItem"/>
          </group>

@@ -1,35 +1,33 @@
 package com.example.todoapp.ui
 
-import android.graphics.Canvas
+
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
 import com.example.todoapp.adapter.TasksAdapter
-import com.example.todoapp.application.TaskApplication
 import com.example.todoapp.databinding.FragmentTaskListBinding
 import com.example.todoapp.model.Task
+import com.example.todoapp.util.adapterItemTouchHelper
+import com.example.todoapp.util.onQueryTextChanged
+import com.example.todoapp.viewmodel.OrderBy
 import com.example.todoapp.viewmodel.TaskViewModel
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class TaskListFragment : Fragment(R.layout.fragment_task_list) {
 
-    lateinit var adapter: TasksAdapter
+    private lateinit var adapter: TasksAdapter
     private var _binding: FragmentTaskListBinding? = null
     private val binding get() = _binding!!
-    private var IsHide=false
 
     private val viewModel: TaskViewModel by viewModels()
 
@@ -42,7 +40,7 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
 
         initRecyclerView()
 
-        binding.floatingAdd.setOnClickListener() {
+        binding.addTask.setOnClickListener {
 
             val action = TaskListFragmentDirections.actionTaskListToNewTask()
             findNavController().navigate(action)
@@ -52,52 +50,37 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
 
     }
 
+
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_menu, menu)
 
         val searchViewItem = menu.findItem(R.id.search_bar_menuItem)
         val searchView = searchViewItem.actionView as SearchView
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-
-                //query?.let { }
-
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-
-                newText?.let { searchDatabase(it) }
-
-                return true
-            }
-
-        })
+       searchView.onQueryTextChanged{ query->
+           viewModel.searchQuery.value=query
+       }
     }
 
-
-    private fun searchDatabase(query: String) {
-        val searchQuery = "%$query%"
-
-        viewModel.searchTask(searchQuery).observe(viewLifecycleOwner) { list ->
-            list.let {
-                adapter.submitList(it)
-            }
-        }
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
-        when (item.itemId)
-        {
-            R.id.deleteComplete_menuItem-> viewModel.deleteAllCompleteTask(condition = true)
+        when (item.itemId) {
+            R.id.deleteComplete_menuItem -> viewModel.deleteCompleteTasks()
 
-            R.id.sortByDate_menuItem->{viewModel.getSortByTask("date",10).observe(viewLifecycleOwner){ adapter.submitList(it) }}
+            R.id.sortByDate_menuItem -> {
+              viewModel.sortedBy.value=OrderBy.OrderByDate
+            }
 
-            R.id.sortByImportant_menuItem->{viewModel.getSortByTask("importance",10).observe(viewLifecycleOwner){ adapter.submitList(it) }}
+            R.id.sortByNote_menuItem -> {
+             viewModel.sortedBy.value=OrderBy.OrderByNote
+            }
 
-            R.id.hideComplete_menuItem->{viewModel.getHideCompleteTask(IsHide).observe(viewLifecycleOwner){ adapter.submitList(it) };IsHide=!IsHide}
+            R.id.hideComplete_menuItem -> {
+                item.isChecked = !item.isChecked
+                viewModel.hideCompleteTask.value=item.isChecked
+            }
         }
 
         return super.onOptionsItemSelected(item)
@@ -109,50 +92,34 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
 
         adapter = TasksAdapter(object : TasksAdapter.OnClickModify {
             override fun onClick(position: Int) {
-                viewModel.getAllTasks.observe(viewLifecycleOwner) {
+                viewModel.getTasks.observe(viewLifecycleOwner) {
+                   // println("onClick view get the task data 5")
                     it?.let { task = it[position] }
                 }
 
                 if (task != null) {
                     val action = TaskListFragmentDirections.actionTaskListToModificationTask(task!!)
                     findNavController().navigate(action)
-                    println("task id and note is = ${task!!.id} , =${task!!.note} ")
+                   // println("task id and note is = ${task!!.id} , =${task!!.note} ")
                 }
             }
 
             override fun onLongClick(position: Int) {
                 // TODO("Not yet implemented")
             }
+
+            override fun onClickCheck(position: Int, boolean: Boolean) {
+                // TODO("Not yet implemented")
+            }
         })
 
-        val simpleCallback = object : ItemTouchHelper.SimpleCallback(0,
-            ItemTouchHelper.RIGHT)
-        {
-            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder
-                                 , target: RecyclerView.ViewHolder): Boolean = false
-
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                when (direction) {
-                    ItemTouchHelper.RIGHT -> {
-                       val task =adapter.getTask(position)
-                        viewModel.deleteTask(adapter.getTask(position))
-                        val snack = Snackbar.make(viewHolder.itemView,"task got deleted",Snackbar.LENGTH_LONG)
-                                            .setAction("Undo"){
-                                                viewModel.insertTask(task)
-                                            }
-                        snack.show()
-                    }
-                }
-            }
-        }
-
+        val simpleCallback = adapterItemTouchHelper(adapter,viewModel)
 
         binding.apply {
 
-            viewModel.getAllTasks.observe(viewLifecycleOwner)
+            viewModel.getTasks.observe(viewLifecycleOwner)
             {
+               // println("init adapter submit list 1")
                 adapter.submitList(it)
             }
             recyclerViewTasks.adapter = adapter

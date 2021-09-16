@@ -28,11 +28,14 @@
         android:id="@+id/noteTask"
         style="@style/TextAppearance.AppCompat.Body2"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="22dp"
+        android:layout_marginBottom="15dp"
         android:ellipsize="end"
         android:maxLines="1"
-        app:layout_constraintBaseline_toBaselineOf="@+id/completeTask"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/importanceTask"
         app:layout_constraintStart_toEndOf="@+id/completeTask"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="TextViewssssssssssssssssssssssssssssssssssssss" />
 </androidx.constraintlayout.widget.ConstraintLayout>
