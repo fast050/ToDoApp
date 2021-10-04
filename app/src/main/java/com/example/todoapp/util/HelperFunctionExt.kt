@@ -4,11 +4,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.adapter.TasksAdapter
+import com.example.todoapp.model.Task
+import com.example.todoapp.ui.ModificationTaskFragment
 import com.example.todoapp.viewmodel.TaskViewModel
-import com.google.android.material.snackbar.Snackbar
-import java.util.*
 
-inline fun SearchView.onQueryTextChanged(crossinline listener:(String)->Unit)
+ fun SearchView.onQueryTextChanged(listener:(String)->Unit)
 {
     this.setOnQueryTextListener(object : SearchView.OnQueryTextListener
     {
@@ -23,6 +23,12 @@ inline fun SearchView.onQueryTextChanged(crossinline listener:(String)->Unit)
 
     })
 }
+
+const val fragmentResult_Request_key="fragmentResult_Request_key"
+const val fragmentResult_Bundle_pair_key="fragmentResult_Bundle_pair_key"
+
+
+
 
 fun adapterItemTouchHelper (adapter:TasksAdapter , viewModel:TaskViewModel) = object : ItemTouchHelper.SimpleCallback(
     0,
@@ -40,16 +46,8 @@ fun adapterItemTouchHelper (adapter:TasksAdapter , viewModel:TaskViewModel) = ob
         when (direction) {
             ItemTouchHelper.RIGHT -> {
                 val task = adapter.getTask(position)
-                viewModel.deleteTask(adapter.getTask(position))
-                val snack = Snackbar.make(
-                    viewHolder.itemView,
-                    "task got deleted",
-                    Snackbar.LENGTH_LONG
-                )
-                    .setAction("Undo") {
-                        viewModel.insertTask(task)
-                    }
-                snack.show()
+                viewModel.onSwapDelete(task = task)
+
             }
         }
     }

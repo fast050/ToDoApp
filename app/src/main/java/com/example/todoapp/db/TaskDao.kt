@@ -3,7 +3,6 @@ package com.example.todoapp.db
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.todoapp.model.Task
-import com.example.todoapp.viewmodel.OrderBy
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -4,15 +4,25 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 
 import android.view.View
+import androidx.core.os.bundleOf
+import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 
 import androidx.navigation.fragment.navArgs
 import com.example.todoapp.R
 import com.example.todoapp.application.TaskApplication
 import com.example.todoapp.databinding.FragmentModificationTaskBinding
 import com.example.todoapp.model.Task
+import com.example.todoapp.util.fragmentResult_Bundle_pair_key
+import com.example.todoapp.util.fragmentResult_Request_key
+import com.example.todoapp.viewmodel.ModificationTaskViewModel
 import com.example.todoapp.viewmodel.TaskViewModel
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -24,45 +34,60 @@ class ModificationTaskFragment : Fragment(R.layout.fragment_modification_task) {
 
     private var _binding: FragmentModificationTaskBinding? = null
     private val binding get() = _binding!!
-    private val args: ModificationTaskFragmentArgs by navArgs()
-    private val viewModel:TaskViewModel by viewModels()
+    private val viewModel: ModificationTaskViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentModificationTaskBinding.bind(view)
 
-         val task = args.taskItem
-
         binding.apply {
-            switchCompletion.isChecked = task.completion
-            switchImportance.isChecked = task.importance
-            editTextTextMultiLine.setText(task.note)
-            createDateModfication.text = "Modify at " + task.createDate
+            switchCompletion.isChecked = viewModel.taskCompletion
+            switchImportance.isChecked = viewModel.taskImportance
+            editTextTextMultiLine.setText(viewModel.taskNote)
+            createDateModfication.text = "Modify at " + viewModel.taskCreatedData
 
-            floatActionButtonUpdateTask.setOnClickListener{
-                updateTask()
+
+            switchCompletion.setOnCheckedChangeListener { _, b ->
+                viewModel.taskCompletion = b
+            }
+
+            switchImportance.setOnCheckedChangeListener { _, b ->
+                viewModel.taskImportance = b
+            }
+
+            editTextTextMultiLine.addTextChangedListener {
+                viewModel.taskNote = it.toString()
+            }
+
+
+            floatActionButtonUpdateTask.setOnClickListener {
+                viewModel.onUpdateTask()
             }
 
         }
 
-    }
 
-    private fun updateTask() {
-        binding.apply {
-            val oldTask = args.taskItem
 
-            val idTask = oldTask.id
-            val important = switchImportance.isChecked
-            val complete = switchCompletion.isChecked
-            val note = editTextTextMultiLine.text.toString()
+        lifecycleScope.launchWhenStarted {
 
-            val task = Task(
-                id = idTask,
-                importance = important,
-                completion = complete, note = note
-            )
+            viewModel.eventFlow.collect { event->
+                when(event){
+                    is ModificationTaskViewModel.SingleEvent.MessageToUser -> {
+                       Snackbar.make(requireView(),event.message,Snackbar.LENGTH_LONG).show()
 
-            viewModel.updateTask(task)
+                    }
+                    is ModificationTaskViewModel.SingleEvent.NavigateToMainFragment -> {
+
+                        binding.editTextTextMultiLine.clearFocus()
+
+                        parentFragmentManager.setFragmentResult(fragmentResult_Request_key, bundleOf(
+                            fragmentResult_Bundle_pair_key to event.message))
+
+                        findNavController().popBackStack()
+                    }
+                }
+
+            }
         }
 
 

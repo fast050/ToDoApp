@@ -2,6 +2,7 @@ package com.example.todoapp.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.widget.Toolbar
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -29,13 +30,19 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         navController = navHostFragment.navController
 
+
+
+        //if we use Toolbar
+        val toolbar: Toolbar =findViewById(R.id.toolbar_main)
+        setSupportActionBar(toolbar)
         setupActionBarWithNavController(navController)
+
+
 
     }
 
     override fun onSupportNavigateUp(): Boolean {
         return super.onSupportNavigateUp() || navController.navigateUp()
     }
-
 
 }

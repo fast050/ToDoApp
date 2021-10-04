@@ -9,18 +9,23 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.R
 import com.example.todoapp.adapter.TasksAdapter
 import com.example.todoapp.databinding.FragmentTaskListBinding
+import com.example.todoapp.db.OrderBy
 import com.example.todoapp.model.Task
 import com.example.todoapp.util.adapterItemTouchHelper
+import com.example.todoapp.util.fragmentResult_Bundle_pair_key
+import com.example.todoapp.util.fragmentResult_Request_key
 import com.example.todoapp.util.onQueryTextChanged
-import com.example.todoapp.viewmodel.OrderBy
 import com.example.todoapp.viewmodel.TaskViewModel
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class TaskListFragment : Fragment(R.layout.fragment_task_list) {
@@ -40,16 +45,50 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
 
         initRecyclerView()
 
+
+        parentFragmentManager.setFragmentResultListener(fragmentResult_Request_key,viewLifecycleOwner){
+            _,bundle->
+            val message = bundle.getString(fragmentResult_Bundle_pair_key,"")
+            viewModel.onShowSuccessMessage(message)
+        }
+
+
+        //Events observer that happen single time
+        lifecycleScope.launchWhenStarted {
+            viewModel.eventObserver.collect { event ->
+                when (event) {
+                    TaskViewModel.SingleEvent.OnNavigationFragmentNewTask -> {
+                        val action = TaskListFragmentDirections.actionTaskListToNewTask()
+                        findNavController().navigate(action)
+                    }
+                    is TaskViewModel.SingleEvent.OnShowDeleteSnackBar -> {
+                        Snackbar.make(requireView(), "Task Deleted", Snackbar.LENGTH_LONG)
+                            .setAction("Undo") {
+                                viewModel.insertTask(event.task)
+                            }.show()
+
+                    }
+                    is TaskViewModel.SingleEvent.OnNavigationFragmentEditTask -> {
+                        val action = TaskListFragmentDirections.actionTaskListToModificationTask(event.task)
+                        findNavController().navigate(action)
+                    }
+                    is TaskViewModel.SingleEvent.OnShowSuccessSnackBar -> {
+                        Snackbar.make(requireView(),event.message,Snackbar.LENGTH_SHORT).show()
+                    }
+                }
+
+            }
+        }
+
+
         binding.addTask.setOnClickListener {
 
-            val action = TaskListFragmentDirections.actionTaskListToNewTask()
-            findNavController().navigate(action)
+            viewModel.onFragmentNavigateToNewTask()
         }
 
         setHasOptionsMenu(true)
 
     }
-
 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -58,9 +97,9 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
         val searchViewItem = menu.findItem(R.id.search_bar_menuItem)
         val searchView = searchViewItem.actionView as SearchView
 
-       searchView.onQueryTextChanged{ query->
-           viewModel.searchQuery.value=query
-       }
+        searchView.onQueryTextChanged { query ->
+            viewModel.searchQuery.value = query
+        }
     }
 
 
@@ -70,16 +109,16 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
             R.id.deleteComplete_menuItem -> viewModel.deleteCompleteTasks()
 
             R.id.sortByDate_menuItem -> {
-              viewModel.sortedBy.value=OrderBy.OrderByDate
+                viewModel.onOrderBySelected(orderBy = OrderBy.OrderByDate)
             }
 
             R.id.sortByNote_menuItem -> {
-             viewModel.sortedBy.value=OrderBy.OrderByNote
+                viewModel.onOrderBySelected(orderBy = OrderBy.OrderByNote)
             }
 
             R.id.hideComplete_menuItem -> {
                 item.isChecked = !item.isChecked
-                viewModel.hideCompleteTask.value=item.isChecked
+                viewModel.onHideItemClicked(item.isChecked)
             }
         }
 
@@ -88,38 +127,25 @@ class TaskListFragment : Fragment(R.layout.fragment_task_list) {
 
 
     private fun initRecyclerView() {
-        var task: Task? = null
+
 
         adapter = TasksAdapter(object : TasksAdapter.OnClickModify {
-            override fun onClick(position: Int) {
-                viewModel.getTasks.observe(viewLifecycleOwner) {
-                   // println("onClick view get the task data 5")
-                    it?.let { task = it[position] }
-                }
-
-                if (task != null) {
-                    val action = TaskListFragmentDirections.actionTaskListToModificationTask(task!!)
-                    findNavController().navigate(action)
-                   // println("task id and note is = ${task!!.id} , =${task!!.note} ")
-                }
+            override fun onClick(task: Task) {
+               viewModel.onFragmentNavigateToEditTask(task)
             }
 
-            override fun onLongClick(position: Int) {
-                // TODO("Not yet implemented")
-            }
 
-            override fun onClickCheck(position: Int, boolean: Boolean) {
-                // TODO("Not yet implemented")
+            override fun onClickCheck(task: Task, boolean: Boolean) {
+                viewModel.onCheckCompletion(task,boolean)
             }
         })
 
-        val simpleCallback = adapterItemTouchHelper(adapter,viewModel)
+        val simpleCallback = adapterItemTouchHelper(adapter, viewModel)
 
         binding.apply {
 
             viewModel.getTasks.observe(viewLifecycleOwner)
             {
-               // println("init adapter submit list 1")
                 adapter.submitList(it)
             }
             recyclerViewTasks.adapter = adapter

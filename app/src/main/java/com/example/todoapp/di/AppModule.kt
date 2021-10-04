@@ -1,6 +1,9 @@
 package com.example.todoapp.di
 
 import android.app.Application
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import com.example.todoapp.db.DATABASE_NAME
 import com.example.todoapp.db.TaskDao
@@ -34,6 +37,8 @@ object AppModule {
     @Provides
     @ApplicationScope
     fun provideCoroutineScope():CoroutineScope= CoroutineScope(SupervisorJob())
+
+
 }
 @Retention(AnnotationRetention.RUNTIME)
 @Qualifier

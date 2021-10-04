@@ -1,8 +1,8 @@
 package com.example.todoapp.repository
 
+import com.example.todoapp.db.OrderBy
 import com.example.todoapp.db.TaskDao
 import com.example.todoapp.model.Task
-import com.example.todoapp.viewmodel.OrderBy
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

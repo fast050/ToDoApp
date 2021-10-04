@@ -16,9 +16,8 @@ class TasksAdapter(private val listener: OnClickModify) :
 
     interface OnClickModify
     {
-        fun onClick(position: Int)
-        fun onLongClick(position: Int)
-        fun onClickCheck(position: Int,boolean: Boolean)
+        fun onClick(task: Task)
+        fun onClickCheck(task: Task,boolean: Boolean)
     }
 
 
@@ -38,7 +37,7 @@ class TasksAdapter(private val listener: OnClickModify) :
 
             binding.completeTask.setOnClickListener {
                 if (adapterPosition!=RecyclerView.NO_POSITION) {
-                    listener.onClickCheck(adapterPosition,binding.completeTask.isChecked)
+                    listener.onClickCheck(getItem(adapterPosition),binding.completeTask.isChecked)
                 }
             }
 
@@ -48,17 +47,11 @@ class TasksAdapter(private val listener: OnClickModify) :
 
                 setOnClickListener{
                     if (adapterPosition!=RecyclerView.NO_POSITION) {
-                        listener.onClick(adapterPosition)
+                        val task=getItem(adapterPosition)
+                        listener.onClick(task)
                     }
                 }
 
-                setOnLongClickListener{
-
-                    if (adapterPosition!=RecyclerView.NO_POSITION) {
-                    listener.onLongClick(adapterPosition)
-                    }
-                    true
-                }
 
             }
 
